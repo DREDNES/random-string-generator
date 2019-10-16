@@ -1,7 +1,7 @@
 # random-string-generator
  Random string generation with given input dataset
 
- h1 Installation instruction
+Installation instruction
 =====================
 1. Make sure you have installed [MySql Server](https://dev.mysql.com/downloads/mysql/) and [PHP](https://www.php.net/downloads.php).
 2. Run MySql Server ($ mysql -u root -p).

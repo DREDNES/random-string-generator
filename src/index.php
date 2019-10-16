@@ -20,18 +20,18 @@ function random ($string)
 
 function set_to_db ($string) 
 {
-  $res = random($string);
-  
-  $host = "127.0.0.1:3306";
-  $user = "root";
-  $password = "12345678";
+	$res = random($string);
 
-  $db = new PDO("mysql:host={$host}; dbname=random_strings", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-  $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
-  return $stmt->execute([
-  ':hash' => hash('md5', $res),
-  ':str'  => $res,
-]);
+	$host = "127.0.0.1:3306";
+	$user = "root";
+	$password = "12345678";	
+	
+	$db = new PDO("mysql:host={$host}; dbname=random_strings", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+	$stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
+	return $stmt->execute([
+	':hash' => hash('md5', $res),
+	':str'  => $res,
+	]);
 }
 
 $string = "{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это

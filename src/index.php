@@ -1,4 +1,18 @@
 <?php
+
+function createArrayOfUniqueStrings($string)
+{
+    $comb = [];
+    while (count($comb) < 75) { //75 - это число возможных комбинаций строки, посчитал вручную, потому что не смог автоматизировать :(
+        $generated_string = random($string);
+        $hash = $hash = hash('md5', $generated_string);
+        if (!array_key_exists($hash, $comb)) {
+            $comb[$hash] = $generated_string;
+        }
+    }
+    return $comb;
+}
+
 function random($string)
 {
     while (strpos($string, "{") !== false) {
@@ -18,17 +32,21 @@ function random($string)
 
 function set_to_db($string)
 {
-    $res = random($string);
     $host = "127.0.0.1:3306";
     $user = "root";
     $password = "12345678";
 
     $db = new PDO("mysql:host={$host}; dbname=random_strings", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-    $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
-    return $stmt->execute([
-        ':hash' => hash('md5', $res),
-        ':str' => $res,
-    ]);
+
+    $generatedStrings = createArrayOfUniqueStrings($string);
+    $result = true;
+    foreach ($generatedStrings as $hash => $value) {
+        $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
+        if (!$stmt->execute([':hash' => $hash, ':str' => $value])) {
+            $result = false;
+        }
+    }
+    return $result;
 }
 
 $string = "{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это
@@ -36,5 +54,7 @@ $string = "{Пожалуйста,|Просто|Если сможете,} сде�
 {быстро|мгновенно|оперативно|правильно} случайным образом|менялось каждый раз}.";
 
 if (set_to_db($string)) {
-    echo 'Success!';
+    echo "Success!";
+} else {
+    echo "Error.";
 }

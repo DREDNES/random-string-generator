@@ -36,29 +36,38 @@ function getCombinationsCount($string)
 
     while (strpos($string, "{") !== false) {
         preg_match_all('/{([^{}]+)}/', $string, $matches);
-        $parts[] = $matches[1];
+        foreach ($matches[1] as $part) {
+            $parts[] = $part;
+        }
         $string = preg_replace_callback('/{([^{}]+)}/',
             function ($subStr) {
                 $strPart = $subStr[0];
-                return "pastHere:{$subStr[1]}";
+                $hash = hash('md5', $subStr[1]);
+                return "pastHere:{$hash}{$subStr[1]}";
             }, $string);
     }
-
     $flatten = new RecursiveIteratorIterator(new RecursiveArrayIterator($parts));
     $flatten = iterator_to_array($flatten, false);
+    foreach ($flatten as $index => $value) {
+        $hash = hash('md5', $value);
+        $flatten[$hash] = $value;
+        unset($flatten[$index]);
+    }
     foreach ($flatten as $index => $part) {
         $pos = strpos($part, "pastHere:");
         if ($pos !== false) {
-            $rest = substr($part, $pos + 9, 15);
-            foreach ($flatten as $cmpIndex => $cmpPart) {
-                if ($index != $cmpIndex) {
-                    if ($rest == substr($cmpPart, 0, 15)) {
-                        unset($flatten[$cmpIndex]);
+            $hash = substr($part, $pos + 9, 32);
+            var_dump($hash);
+            foreach ($flatten as $cmpHash => $cmpPart) {
+                if ($index != $cmpHash) {
+                    if ($hash == $cmpHash) {
+                        unset($flatten[$cmpHash]);
                     }
                 }
             }
         }
     }
+
     $arrayCounts = array_map(function ($part) {
         return count(explode("|", $part));
     }, $flatten);

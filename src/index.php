@@ -3,7 +3,8 @@
 function createArrayOfUniqueStrings($string)
 {
     $comb = [];
-    while (count($comb) < 75) { //75 - это число возможных комбинаций строки, посчитал вручную, потому что не смог автоматизировать :(
+    $combinationsCount = getCombinationsCount($string);
+    while (count($comb) < $combinationsCount) {
         $generated_string = random($string);
         $hash = $hash = hash('md5', $generated_string);
         if (!array_key_exists($hash, $comb)) {
@@ -30,7 +31,41 @@ function random($string)
     return $string;
 }
 
-function setToDb($string)
+function getCombinationsCount($string){
+
+    while (strpos($string, "{") !== false) {
+        preg_match_all('/{([^{}]+)}/', $string, $matches);
+        $parts[] = $matches[1];
+        $string = preg_replace_callback('/{([^{}]+)}/', 
+                function($subStr) { 
+                    $strPart = $subStr[0];
+                    return "pastHere:{$subStr[1]}"; 
+                }, $string);
+    }
+
+    $flatten = new RecursiveIteratorIterator(new RecursiveArrayIterator($parts));
+    $flatten = iterator_to_array($flatten, false);
+    foreach($flatten as $index=>$part) {
+        $pos = strpos($part, "pastHere:");
+        if ($pos !== false) {
+            $rest = substr($part, $pos+9, 15);
+            foreach($flatten as $cmpIndex=>$cmpPart){
+                if($index != $cmpIndex) {
+                    if ($rest == substr($cmpPart, 0, 15)) {
+                        unset($flatten[$cmpIndex]);
+                    }
+                }
+            }
+        }
+    }
+    $arrayCounts = array_map(function($part){
+        return count(explode("|", $part));
+    }, $flatten);
+
+    return array_product($arrayCounts);
+}
+
+function setToDb($data)
 {
     $host = "127.0.0.1:3306";
     $user = "root";
@@ -38,9 +73,8 @@ function setToDb($string)
 
     $db = new PDO("mysql:host={$host}; dbname=random_strings", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-    $generatedStrings = createArrayOfUniqueStrings($string);
     $result = true;
-    foreach ($generatedStrings as $hash => $value) {
+    foreach ($data as $hash => $value) {
         $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
         if (!$stmt->execute([':hash' => $hash, ':str' => $value])) {
             $result = false;
@@ -49,11 +83,10 @@ function setToDb($string)
     return $result;
 }
 
-$string = "{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это
-{удивительное|крутое|простое|важное|бесполезное} тестовое предложение {изменялось
-{быстро|мгновенно|оперативно|правильно} случайным образом|менялось каждый раз}.";
+$string = "{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это {удивительное|крутое|простое|важное|бесполезное} тестовое предложение {изменялось {быстро|мгновенно|оперативно|правильно} случайным образом|менялось каждый раз}.";
+$generatedStrings = createArrayOfUniqueStrings($string);
 
-if (setToDb($string)) {
+if (setToDb($generatedStrings)) {
     echo "Success!";
 } else {
     echo "Error.";

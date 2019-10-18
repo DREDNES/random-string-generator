@@ -33,10 +33,9 @@ function random($string)
 
 function getCombinationsCount($string)
 {
-
     while (strpos($string, "{") !== false) {
         preg_match_all('/{([^{}]+)}/', $string, $matches);
-        $parts = $matches[1];
+        $parts[] = $matches[1];
         $string = preg_replace_callback('/{([^{}]+)}/',
             function ($subStr) {
                 $strPart = $subStr[0];
@@ -80,14 +79,14 @@ function setToDb($data)
 
     $db = new PDO("mysql:host={$host}; dbname=random_strings", $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-    $result = true;
-    foreach ($data as $hash => $value) {
-        $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES (:hash, :str)');
-        if (!$stmt->execute([':hash' => $hash, ':str' => $value])) {
-            $result = false;
-        }
+    $sqlParts = [];
+    foreach ($data as $hash => $str) {
+        $sqlParts[] = sprintf('(%s, %s)', $db->quote($hash), $db->quote($str));
     }
-    return $result;
+
+    $stmt = $db->prepare('INSERT IGNORE INTO strings (hash, str) VALUES ' . implode(',', $sqlParts));
+    return $stmt->execute();
+
 }
 
 $string = "{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это {удивительное|крутое|простое|важное|бесполезное} тестовое предложение {изменялось {быстро|мгновенно|оперативно|правильно} случайным образом|менялось каждый раз}.";

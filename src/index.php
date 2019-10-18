@@ -55,7 +55,6 @@ function getCombinationsCount($string)
         $pos = strpos($part, "pastHere:");
         if ($pos !== false) {
             $hash = substr($part, $pos + 9, 32);
-            var_dump($hash);
             foreach ($flatten as $cmpHash => $cmpPart) {
                 if ($index != $cmpHash) {
                     if ($hash == $cmpHash) {

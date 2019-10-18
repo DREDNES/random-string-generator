@@ -31,26 +31,27 @@ function random($string)
     return $string;
 }
 
-function getCombinationsCount($string){
+function getCombinationsCount($string)
+{
 
     while (strpos($string, "{") !== false) {
         preg_match_all('/{([^{}]+)}/', $string, $matches);
         $parts[] = $matches[1];
-        $string = preg_replace_callback('/{([^{}]+)}/', 
-                function($subStr) { 
-                    $strPart = $subStr[0];
-                    return "pastHere:{$subStr[1]}"; 
-                }, $string);
+        $string = preg_replace_callback('/{([^{}]+)}/',
+            function ($subStr) {
+                $strPart = $subStr[0];
+                return "pastHere:{$subStr[1]}";
+            }, $string);
     }
 
     $flatten = new RecursiveIteratorIterator(new RecursiveArrayIterator($parts));
     $flatten = iterator_to_array($flatten, false);
-    foreach($flatten as $index=>$part) {
+    foreach ($flatten as $index => $part) {
         $pos = strpos($part, "pastHere:");
         if ($pos !== false) {
-            $rest = substr($part, $pos+9, 15);
-            foreach($flatten as $cmpIndex=>$cmpPart){
-                if($index != $cmpIndex) {
+            $rest = substr($part, $pos + 9, 15);
+            foreach ($flatten as $cmpIndex => $cmpPart) {
+                if ($index != $cmpIndex) {
                     if ($rest == substr($cmpPart, 0, 15)) {
                         unset($flatten[$cmpIndex]);
                     }
@@ -58,7 +59,7 @@ function getCombinationsCount($string){
             }
         }
     }
-    $arrayCounts = array_map(function($part){
+    $arrayCounts = array_map(function ($part) {
         return count(explode("|", $part));
     }, $flatten);
 

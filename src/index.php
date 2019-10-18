@@ -36,9 +36,7 @@ function getCombinationsCount($string)
 
     while (strpos($string, "{") !== false) {
         preg_match_all('/{([^{}]+)}/', $string, $matches);
-        foreach ($matches[1] as $part) {
-            $parts[] = $part;
-        }
+        $parts = $matches[1];
         $string = preg_replace_callback('/{([^{}]+)}/',
             function ($subStr) {
                 $strPart = $subStr[0];

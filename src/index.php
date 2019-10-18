@@ -6,7 +6,7 @@ function createArrayOfUniqueStrings($string)
     $combinationsCount = getCombinationsCount($string);
     while (count($comb) < $combinationsCount) {
         $generated_string = random($string);
-        $hash = $hash = hash('md5', $generated_string);
+        $hash = hash('md5', $generated_string);
         if (!array_key_exists($hash, $comb)) {
             $comb[$hash] = $generated_string;
         }

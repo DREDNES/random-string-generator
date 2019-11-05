@@ -1,5 +1,13 @@
 # random-string-generator
- Random string generation with given input dataset
+## Random string generation from given string
+
+*{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это
+{удивительное|крутое|простое|важное|бесполезное} тестовое предложение {изменялось
+{быстро|мгновенно|оперативно|правильно} случайным образом|менялось каждый раз}.*
+
+Application opens brackets and get random generated string. Brackets can be infinitely nested.
+
+Then it gets all possible strings and writes it to mysql database.
 
 Installation instruction
 =====================

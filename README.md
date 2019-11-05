@@ -1,5 +1,4 @@
-# random-string-generator
-## Random string generation from given string
+# Random string generation from given string
 
 *{Пожалуйста,|Просто|Если сможете,} сделайте так, чтобы это
 {удивительное|крутое|простое|важное|бесполезное} тестовое предложение {изменялось
